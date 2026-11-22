@@ -1,78 +1,55 @@
-global _start
-
-selection .bss ;dados não inicializados
-    buffer resb 100 ; reserva 100 bytes
-    numero resq  1 ;reserva 1 qword (8 bytes)
-
-selection .text
-
 identificar_tamanho:
 
-    cmp rsi, 00000000b  ;se rsi tivesse só elementos 0 (vazio), retorna 0
-    jz tam0             ;vai para tam0 se rsi for vazio
+  ; - Calcula quantos bytes cada caractere ocupa -
 
-    mov bl, rsi         ; coloca o conteúdo de rsi em bl
-    and bl, 10000000b   ;verifica o bit mais significativos de bl
-    cmp bl, 00000000b   ;se bl tiver o bit mais significativo 0, retorna 0
-    jz tam1             ;se cmp retornou 0, vai para tam1
+    mov rsi, [rsp + 8]  ; move para rsi o endereço do byte_buffer passado pelo _start
 
-    mov bl, rsi         ; coloca o conteúdo de rsi em bl
-    and bl, 11100000b   ;verifica os 3 bits mais significativos de bl
-    cmp bl, 11000000b   ;se bl tiver os 3 bits mais significativos 110, retorna 0
-    jz tam2             ;se cmp retornou 0, vai para tam2
+    mov dl, [rsi]       ; coloca o conteúdo de rsi em dl
+    and dl, 10000000b   ; verifica o bit mais significativos de dl
+    cmp dl, 00000000b   ; se dl tiver o bit mais significativo 0, retorna 0
+    jz tam1             ; se cmp retornou 0, vai para tam1
 
-    AND 1110,
-    mov bl, rsi         ; coloca o conteúdo de rsi em bl
-    and bl, 11110000b   ;verifica os 4 bits mais significativos de bl
-    cmp bl, 11100000b   ;se bl tiver os 4 bits mais significativos 1110, retorna 0
-    jz tam3             ;se cmp retornou 0, vai para tam3
+    mov dl, [rsi]       ; coloca o conteúdo de rsi em dl
+    and dl, 11100000b   ; verifica os 3 bits mais significativos de dl
+    cmp dl, 11000000b   ; se dl tiver os 3 bits mais significativos 110, retorna 0
+    jz tam2             ; se cmp retornou 0, vai para tam2
 
-    AND 11110,
-    mov bl, rsi         ; coloca o conteúdo de rsi em bl
-    and bl, 11111000b   ;verifica os 5 bits mais significativos de bl
-    cmp bl, 11110000b   ;se bl tiver os 5 bits mais significativos 11110, retorna 0
-    jz tam4             ;se cmp retornou 0, vai para tam4
+    mov dl, [rsi]       ; coloca o conteúdo de rsi em dl
+    and dl, 11110000b   ; verifica os 4 bits mais significativos de dl
+    cmp dl, 11100000b   ; se dl tiver os 4 bits mais significativos 1110, retorna 0
+    jz tam3             ; se cmp retornou 0, vai para tam3
 
-        mov r12, -1     ; coloca o valor -1 em r12 para demonstrar um erro, pois não foi identificado nenhum dos tipos
-        ret             ;retorna para onde a função foi chamada
+    mov dl, [rsi]       ; coloca o conteúdo de rsi em dl
+    and dl, 11111000b   ; verifica os 5 bits mais significativos de dl
+    cmp dl, 11110000b   ; se dl tiver os 5 bits mais significativos 11110, retorna 0
+    jz tam4             ; se cmp retornou 0, vai para tam4
 
-    tam0:
-        mov r12, 0      ; coloca o valor 0 em r12 para demonstrar que não foi lido nada
-        ret             ;retorna para onde a função foi chamada
+        mov rax, -1     ; coloca o valor -1 em rax para demonstrar um erro (nenhum dos tipos)
+        ret             ; retorna para onde a função foi chamada
 
     tam1:
-        mov r12, 1      ; coloca o valor 1 em r12 para demonstrar o numero de bytes
-        ret             ;retorna para onde a função foi chamada
+        mov rax, 1      ; coloca o valor 1 em rax para demonstrar o numero de bytes
+        ret             ; retorna para onde a função foi chamada
 
     tam2:
-        mov r12, 2      ;coloca o valor 2 em r12 para demonstrar o numero de bytes
-        ret             ;retorna para onde a função foi chamada
+        mov rax, 2      ; coloca o valor 2 em rax para demonstrar o numero de bytes
+        ret             ; retorna para onde a função foi chamada
 
     tam3:
-        mov r12, 3      ;coloca o valor 3 em r12 para demonstrar o numero de bytes
-        ret             ;retorna para onde a função foi chamada
+        mov rax, 3      ; coloca o valor 3 em rax para demonstrar o numero de bytes
+        ret             ; retorna para onde a função foi chamada
 
     tam4:
-        mov r12, 4      ;coloca o valor 4 em r12 para demonstrar o numero de bytes
-        ret             ;retorna para onde a função foi chamada
-
+        mov rax, 4      ; coloca o valor 4 em rax para demonstrar o numero de bytes
+        ret             ; retorna para onde a função foi chamada
 
 le_byte_arquivo:
-    mov rax, 0                  ;número da syscall para read
-    mov rdi, [rsp + 8]          ;descritor de arquivo passado na stack
-    mov rsi, [rsp + 16]         ;o que será lido irá para o buffer passado na stack
-    mov rdx, 1                  ;indica que só 1 byte será lido
-    syscall                     ;executa a chamada do sistema
-        ret                     ;retorna para onde a função foi chamada
 
+  ; - Lê byte a byte dos caracteres do arquivo -
 
-
-
-_start:
-
-
-
-
-    mov rax, 60        ; numero de syscall para exit
-    mov rdi, 0         ; código de saída: 0 (sucesso).
-    syscall            ; chama o sistema operacional para encerrar o programa
+    mov rax, 0                  ; número da syscall para read
+    mov rdi, [rsp + 8]          ; descritor de arquivo passado na stack
+    mov rsi, [rsp + 16]         ; o que será lido irá para o buffer passado na stack
+    mov rdx, 1                  ; indica que só 1 byte será lido
+    syscall                     ; executa a chamada do sistema
+    ret                         ; retorna para onde a função foi chamada
