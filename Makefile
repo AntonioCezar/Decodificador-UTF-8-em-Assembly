@@ -1,12 +1,15 @@
 COMPILADOR = nasm
 FLAGS = -f elf64 -g -F dwarf
-ARQUIVO = input_output.asm
+ARQUIVO = tarefa3-Grupo6.asm
 
-all: Artifacts/main.o Artifacts/programa
+all: Artifacts/programa
 
 # -----
 
-Artifacts/main.o: $(ARQUIVO)
+Artifacts:
+	mkdir -p Artifacts
+
+Artifacts/main.o: $(ARQUIVO) | Artifacts
 	$(COMPILADOR) $(FLAGS) $< -o $@
 
 Artifacts/programa: Artifacts/main.o
@@ -23,13 +26,9 @@ clean:
 
 # -----
 
-rebuild: clean all # lembrar de apagar quando o programa estiver completo
-
-# -----
-
 run: Artifacts/programa
 	./Artifacts/programa
 
 # -----
 
-.PHONY: all build run clean rebuid
+.PHONY: all build run clean
