@@ -1,6 +1,6 @@
 section .data                         ; variaveis inicializadas
   meu_arquivo db "teste_texto", 0     ; path do arquivo que queremos ler
-  mensagem db "arquivo aberto, prosseguindo para o fechamento", 10, 0        ; mensagem de teste
+  mensagem db 10, "arquivo aberto, prosseguindo para o fechamento", 10, 0        ; mensagem de teste
 
 section .bss                          ; variaveis não inicializadas
   buffer resb 100                     ; reserva 100 bytes para guardar a leitura
